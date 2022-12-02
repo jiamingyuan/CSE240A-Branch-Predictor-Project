@@ -7,7 +7,7 @@
 //========================================================//
 #include <stdio.h>
 #include "predictor.h"
-#include "tournament.h"
+// #include "tournament.h"
 
 //
 // TODO:Student Information
@@ -45,7 +45,7 @@ uint8_t *pht_local;
 uint8_t *pht_global;
 uint8_t *choices;
 
-TNM_Predictor *tnm;
+// TNM_Predictor *tnm;
 //
 // TODO: Add your own Branch Predictor data structures here
 //
@@ -150,6 +150,7 @@ void tournament_train(uint32_t pc, uint8_t outcome)
 void gshare_train(uint32_t pc, uint8_t outcome)
 {
   int idx = (pc ^ ghist) & ((1 << ghistoryBits) - 1);
+  
   uint8_t decision = *(pht + idx);
   if (outcome && decision != ST)
   {
