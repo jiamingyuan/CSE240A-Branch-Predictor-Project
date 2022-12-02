@@ -13,3 +13,8 @@ SN = 0
 WN = 1
 WT = 2
 ST = 3
+
+SL = 0
+WL = 1
+WG = 2
+SG = 3

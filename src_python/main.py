@@ -2,14 +2,17 @@ import argparse
 from tqdm import *
 
 from gshare import GShare
+from tournament import Tournament
 from constants import *
 
 def params():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--bptype", default=1, type=int)
+    parser.add_argument("--bptype", default=TOURNAMENT, type=int)
     parser.add_argument("--file", default="../traces/fp_1", type=str)
-    parser.add_argument('--ghistoryBits', default=10, type=int)
+    parser.add_argument('--globalHistoryBits', default=10, type=int)
+    parser.add_argument('--localHistoryBits', default=10, type=int)
+    parser.add_argument('--pcIndexBits', default=10, type=int)
 
     args = parser.parse_args()
     return args
@@ -25,7 +28,11 @@ if __name__ == '__main__':
     args = params()
 
     if args.bptype == GSHARE:
-        predictor = GShare(args.ghistoryBits)
+        predictor = GShare(args.globalHistoryBits)
+    if args.bptype == TOURNAMENT:
+        predictor = Tournament(args.globalHistoryBits,
+                           args.localHistoryBits,
+                           args.pcIndexBits)
 
     num_branches = 0
     mispredictions = 0

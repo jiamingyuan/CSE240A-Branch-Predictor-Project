@@ -1,13 +1,13 @@
 from constants import *
 
 class GShare:
-    def __init__(self, ghistoryBits):
-        self.ghistoryBits = ghistoryBits
-        self.ghist = 0
-        self.pht = [WN] * (2 ** self.ghistoryBits)
+    def __init__(self, globalHistoryBits):
+        self.globalMask = (1 << globalHistoryBits) - 1
+        self.globalHist = 0
+        self.pht = [WN] * (1 << globalHistoryBits)
 
     def predict(self, pc):
-        idx = (pc ^ self.ghist) & ((1 << self.ghistoryBits) - 1)
+        idx = (pc ^ self.globalHist) & self.globalMask
         decision = self.pht[idx]
 
         if decision == WT or decision == ST:
@@ -16,14 +16,14 @@ class GShare:
             return NOTTAKEN
 
     def train(self, pc, outcome):
-        idx = (pc ^ self.ghist) & ((1 << self.ghistoryBits) - 1)
+        idx = (pc ^ self.globalHist) & self.globalMask
         decision = self.pht[idx]
 
         if outcome and (decision != ST):
-            self.pht[idx] = decision + 1
+            self.pht[idx] += 1
         elif not outcome and (decision != SN):
-            self.pht[idx] = decision - 1
+            self.pht[idx] -= 1
 
-        self.ghist = outcome | (self.ghist << 1) & ((1 << self.ghistoryBits) - 1)
+        self.globalHist = outcome | (self.globalHist << 1) & self.globalMask
 
         return (decision == WT or decision == ST) == outcome
