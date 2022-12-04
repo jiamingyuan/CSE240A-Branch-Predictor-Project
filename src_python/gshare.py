@@ -1,29 +1,18 @@
-from constants import *
+from pht import PHT
 
 class GShare:
-    def __init__(self, globalHistoryBits):
-        self.globalMask = (1 << globalHistoryBits) - 1
-        self.globalHist = 0
-        self.pht = [WN] * (1 << globalHistoryBits)
-
-    def predict(self, pc):
-        idx = (pc ^ self.globalHist) & self.globalMask
-        decision = self.pht[idx]
-
-        if decision == WT or decision == ST:
-            return TAKEN
-        else:
-            return NOTTAKEN
+    def __init__(self, global_history_bits):
+        self.global_history_table = PHT(global_history_bits)
+        self.global_hist = 0
+        self.global_mask = (1 << global_history_bits) - 1
 
     def train(self, pc, outcome):
-        idx = (pc ^ self.globalHist) & self.globalMask
-        decision = self.pht[idx]
+        # Make prediction and update
+        gshare_index = (pc ^ self.global_hist) & self.global_mask
+        decision, _ = self.global_history_table.train(gshare_index, outcome)
 
-        if outcome and (decision != ST):
-            self.pht[idx] += 1
-        elif not outcome and (decision != SN):
-            self.pht[idx] -= 1
+        # Update global history
+        self.global_hist = outcome | (self.global_hist << 1) & self.global_mask
 
-        self.globalHist = outcome | (self.globalHist << 1) & self.globalMask
-
-        return (decision == WT or decision == ST) == outcome
+        # Output result
+        return decision == outcome

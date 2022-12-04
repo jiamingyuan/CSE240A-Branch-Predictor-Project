@@ -1,6 +1,7 @@
+from constants import *
 from pht import PHT
 
-class Tournament:
+class Custom:
     def __init__(self, global_history_bits, local_history_bits, pc_index_bits):
         # Initialize masks
         self.global_mask = (1 << global_history_bits) - 1
@@ -14,6 +15,7 @@ class Tournament:
         # Initialize tabels
         self.local_history_table = PHT(local_history_bits)
         self.global_history_table = PHT(global_history_bits)
+        self.gshare_history_table = PHT(global_history_bits)
         self.choice_table = PHT(global_history_bits)
 
     def train(self, pc, outcome):
@@ -25,13 +27,19 @@ class Tournament:
         # Global prediction
         global_decision, _ = self.global_history_table.train(self.global_history, outcome)
 
+        # Gshare prediction
+        gshare_idx = (pc ^ self.global_history) & self.global_mask
+        gshare_decision, _ = self.gshare_history_table.train(gshare_idx, outcome)
+
         # Make decision
-        if local_decision == global_decision:
+        if local_decision == gshare_decision:
             decision = local_decision
-        elif self.choice_table.train(self.global_history, global_decision == outcome)[0]:
-            decision = global_decision
         else:
-            decision = local_decision
+            choice, neutral = self.choice_table.train(self.global_history, gshare_decision == outcome)
+            if choice:
+                decision = gshare_decision
+            else:
+                decision = local_decision
 
         # History updation
         local_history_new = outcome | (self.local_history.get(local_hist_idx) << 1) & self.local_mask
@@ -40,4 +48,3 @@ class Tournament:
 
         # Output
         return decision == outcome
-

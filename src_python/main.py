@@ -3,16 +3,18 @@ from tqdm import *
 
 from gshare import GShare
 from tournament import Tournament
+from custom import Custom
 from constants import *
 
 def params():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--bptype", default=TOURNAMENT, type=int)
-    parser.add_argument("--file", default="../traces/fp_1", type=str)
-    parser.add_argument('--globalHistoryBits', default=10, type=int)
-    parser.add_argument('--localHistoryBits', default=10, type=int)
-    parser.add_argument('--pcIndexBits', default=10, type=int)
+    parser.add_argument("--bptype", default=GSHARE, type=int)
+    parser.add_argument("--file", default="../traces/mm_2", type=str)
+    parser.add_argument('--global_history_bits', default=10, type=int)
+    parser.add_argument('--local_history_bits', default=10, type=int)
+    parser.add_argument('--pc_index_bits', default=10, type=int)
+    # parser.add_argument('--choiceIndexBits', default=5, type=int)
 
     args = parser.parse_args()
     return args
@@ -28,11 +30,15 @@ if __name__ == '__main__':
     args = params()
 
     if args.bptype == GSHARE:
-        predictor = GShare(args.globalHistoryBits)
-    if args.bptype == TOURNAMENT:
-        predictor = Tournament(args.globalHistoryBits,
-                           args.localHistoryBits,
-                           args.pcIndexBits)
+        predictor = GShare(args.global_history_bits)
+    elif args.bptype == TOURNAMENT:
+        predictor = Tournament(args.global_history_bits,
+                               args.local_history_bits,
+                               args.pc_index_bits)
+    elif args.bptype == CUSTOM:
+        predictor = Custom(args.global_history_bits,
+                           args.local_history_bits,
+                           args.pc_index_bits)
 
     num_branches = 0
     mispredictions = 0
